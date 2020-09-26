@@ -163,10 +163,8 @@ void gocdeListDraw(void)
     {
       setDynamicLabel(i, infoFile.file[i + infoFile.cur_page * NUM_PER_PAGE - infoFile.F_num]);
     }
-
     printListItems.items[i].titlelabel.index = LABEL_DYNAMIC;
     menuDrawListItem(&printListItems.items[i], i);
-
   }
 
   for (; (i < NUM_PER_PAGE); i++) //background
@@ -307,7 +305,7 @@ void menuPrintFromSource(void)
             //load model preview in flash if icon exists
             setPrintModelIcon(infoFile.source != BOARD_SD && model_DecodeToFlash(infoFile.title));
 
-            char temp_info[75];
+            char temp_info[FILE_NUM + 50];
             sprintf(temp_info, (char *)textSelect(LABEL_START_PRINT), infoFile.file[key_num + start - infoFile.F_num]);
             //confirm file selction
             showDialog(DIALOG_TYPE_QUESTION, textSelect(LABEL_PRINT), (u8*)temp_info,
@@ -351,29 +349,30 @@ void menuPrintFromSource(void)
   }
 }
 
-MENUITEMS sourceSelItems = {
-//  title
-LABEL_PRINT,
-// icon                       label
- {{ICON_ONTFT_SD,            LABEL_TFTSD},
- #ifdef U_DISK_SUPPORT
-  {ICON_U_DISK,               LABEL_U_DISK},
-  #define ONBOARD_SD_INDEX 2
- #else
-  #define ONBOARD_SD_INDEX 1
-  {ICON_BACKGROUND,           LABEL_BACKGROUND},
- #endif
-  {ICON_BACKGROUND,           LABEL_BACKGROUND},
-  {ICON_BACKGROUND,           LABEL_BACKGROUND},
-  {ICON_BACKGROUND,           LABEL_BACKGROUND},
-  {ICON_BACKGROUND,           LABEL_BACKGROUND},
-  {ICON_BACKGROUND,           LABEL_BACKGROUND},
-  {ICON_BACK,                 LABEL_BACK}}
-};
 
 void menuPrint(void)
 {
   KEY_VALUES  key_num;
+
+  MENUITEMS sourceSelItems = {
+  //  title
+  LABEL_PRINT,
+  // icon                       label
+  {{ICON_ONTFT_SD,            LABEL_TFTSD},
+  #ifdef U_DISK_SUPPORT
+    {ICON_U_DISK,               LABEL_U_DISK},
+    #define ONBOARD_SD_INDEX 2
+  #else
+    #define ONBOARD_SD_INDEX 1
+    {ICON_BACKGROUND,           LABEL_BACKGROUND},
+  #endif
+    {ICON_BACKGROUND,           LABEL_BACKGROUND},
+    {ICON_BACKGROUND,           LABEL_BACKGROUND},
+    {ICON_BACKGROUND,           LABEL_BACKGROUND},
+    {ICON_BACKGROUND,           LABEL_BACKGROUND},
+    {ICON_BACKGROUND,           LABEL_BACKGROUND},
+    {ICON_BACK,                 LABEL_BACK}}
+  };
 
   sourceSelItems.items[ONBOARD_SD_INDEX].icon = (infoMachineSettings.onboard_sd_support == ENABLED) ? ICON_ONBOARD_SD : ICON_BACKGROUND;
   sourceSelItems.items[ONBOARD_SD_INDEX].label.index = (infoMachineSettings.onboard_sd_support == ENABLED) ? LABEL_ONBOARDSD : LABEL_BACKGROUND;
@@ -404,11 +403,12 @@ void menuPrint(void)
       #endif
           if(infoMachineSettings.onboard_sd_support == ENABLED)
           {
-            list_mode = true; //force list mode in Onboard sd casd
+            list_mode = true; //force list mode in Onboard sd card
             infoFile.source = BOARD_SD;
             infoMenu.menu[++infoMenu.cur] = menuPrintFromSource;   //TODO: fix here,  onboard sd card PLR feature
             goto selectEnd;
           }
+          break;
 
       case KEY_ICON_7:
         infoMenu.cur--;

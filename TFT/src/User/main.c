@@ -25,7 +25,6 @@ void Hardware_GenericInit(void)
   mcu_GetClocksFreq(&mcuClocks);
   NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
   Delay_init();
-  OS_TimerInitMs();  // System clock timer, cycle 1ms
 
   #ifdef DISABLE_JTAG
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
@@ -43,11 +42,17 @@ void Hardware_GenericInit(void)
   #endif
 
   XPT2046_Init();
+  OS_TimerInitMs();  // System clock timer, cycle 1ms, called after XPT2046_Init()
   W25Qxx_Init();
   LCD_Init();
   readStoredPara(); // Read settings parameter
   LCD_RefreshDirection();  //refresh display direction after reading settings
   scanUpdates();           // scan icon, fonts and config files
+  checkflashSign();       // check font/icon/config signature in SPI flash for update
+
+  #ifdef LED_COLOR_PIN
+    knob_LED_Init();
+  #endif
 
   #if !defined(MKS_32_V1_4)
     //causes hang if we deinit spi1
@@ -66,10 +71,6 @@ void Hardware_GenericInit(void)
     FIL_Runout_Init();
   #endif
 
-  #ifdef LED_COLOR_PIN
-    knob_LED_Init();
-  #endif
-
   #ifdef U_DISK_SUPPORT
     USBH_Init(&USB_OTG_Core, USB_OTG_FS_CORE_ID, &USB_Host, &USBH_MSC_cb, &USR_cb);
   #endif
@@ -84,12 +85,12 @@ void Hardware_GenericInit(void)
     storePara();
   }
 
-  printSetUpdateWaiting(infoSettings.m27_active);
   #ifdef LCD_LED_PWM_CHANNEL
     Set_LCD_Brightness(LCD_BRIGHTNESS[infoSettings.lcd_brightness]);
   #endif
   GUI_RestoreColorDefault();
   infoMenuSelect();
+  fanControlInit();
 }
 
 int main(void)

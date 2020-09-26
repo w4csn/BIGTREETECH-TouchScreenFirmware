@@ -1,19 +1,20 @@
 #ifndef _HD44780_H
 #define _HD44780_H
 
-#include "variants.h"
-#define HD44780_data_MAX (1024 * 5)
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-typedef struct
-{
-  u8  *data;
-  u16 rIndex;
-  u16 wIndex;
-}HD44780_QUEUE;
-
-extern HD44780_QUEUE HD44780_queue;
+#include "CircularQueue.h"
+#include <stdbool.h>
 
 void HD44780_DeConfig(void);
-void HD44780_Config(void);
+void HD44780_Config(CIRCULAR_QUEUE *queue);
+bool HD44780_writeData(void);
+bool HD44780_getData(uint8_t *data);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
